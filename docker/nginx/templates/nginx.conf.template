@@ -1,0 +1,28 @@
+events {}
+
+http {
+    server {
+        listen 80;
+        server_name localhost;
+
+        location / {
+            return 301 https://$${REDIRECT_HOST}$${REDIRECT_REQUEST_URI};
+        }
+    }
+
+    server {
+        listen 443 ssl;
+        server_name localhost;
+
+        ssl_certificate /etc/nginx/certs/selfsigned.crt;
+        ssl_certificate_key /etc/nginx/certs/selfsigned.key;
+
+        location / {
+            proxy_pass http://${APP_HOST}:${APP_PORT};
+            proxy_set_header Host $${PROXY_HEADER_HOST};
+            proxy_set_header X-Real-IP $${PROXY_HEADER_REMOTE_ADDR};
+            proxy_set_header X-Forwarded-For $${PROXY_HEADER_X_FORWARDED_FOR};
+            proxy_set_header X-Forwarded-Proto $${PROXY_HEADER_PROTO};
+        }
+    }
+}
